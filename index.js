@@ -41,10 +41,9 @@ const generateQuoteImage = async (englishQuote, catTranslation) => {
   const imageWidth = image.bitmap.width;
   const imageHeight = image.bitmap.height;
 
-  const padding = 40; // Padding from the edges
-  const textMaxWidth = (imageWidth / 2) - padding; // Restrict to left half
+  const padding = 40;
+  const textMaxWidth = (imageWidth / 2) - padding;
 
-  // Print English quote
   const englishTextY = padding;
   const englishMaxHeight = imageHeight - padding - englishTextY;
 
@@ -54,14 +53,11 @@ const generateQuoteImage = async (englishQuote, catTranslation) => {
     alignmentY: Jimp.VERTICAL_ALIGN_TOP
   }, textMaxWidth, englishMaxHeight);
 
-  // Calculate the actual height of the rendered English text
   const englishTextRenderedHeight = Jimp.measureTextHeight(fontEnglish, englishQuote, textMaxWidth);
 
-  // Calculate max height for Cat translation
-  const catTextY = englishTextY + englishTextRenderedHeight + 30; // 30 for spacing between lines
+  const catTextY = englishTextY + englishTextRenderedHeight + 30;
   const catMaxHeight = imageHeight - padding - catTextY;
 
-  // Print Cat translation
   image.print(fontCat, padding, catTextY, {
     text: `Cat: ${catTranslation}`,
     alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT,
@@ -87,7 +83,6 @@ const tweetQuote = async () => {
     await twitterClient.v2.tweet(truncatedTweet, { media: { media_ids: [mediaId] } });
     console.log('Tweeted:', truncatedTweet);
 
-    // Clean up the temporary image file
     fs.unlinkSync(imagePath);
   } catch (error) {
     console.error('Error tweeting:', error);
