@@ -4,7 +4,7 @@ const cron = require('node-cron');
 
 require('dotenv').config();
 
-// Twitter API credentials
+
 const client = new TwitterApi({
   appKey: process.env.TWITTER_APP_KEY,
   appSecret: process.env.TWITTER_APP_SECRET,
