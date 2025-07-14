@@ -14,7 +14,6 @@ const client = new TwitterApi({
 
 const twitterClient = client.readWrite;
 
-// Load quotes from quotes.json
 const quotes = JSON.parse(fs.readFileSync('./quotes.json', 'utf8'));
 
 const generateCatTranslation = (englishText) => {
@@ -34,7 +33,7 @@ const tweetQuote = async () => {
   const randomIndex = Math.floor(Math.random() * quotes.length);
   const { english, cat_translation } = quotes[randomIndex];
 
-  const tweetText = `"${english}"\n\nCat Translation:\n${cat_translation}`;
+  const tweetText = `"${english}"\n\nCat:\n${cat_translation}`;
 
   try {
     const truncatedTweet = tweetText.length > 280 ? tweetText.substring(0, 277) + '...' : tweetText;
