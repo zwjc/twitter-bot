@@ -1,6 +1,8 @@
 const { TwitterApi } = require('twitter-api-v2');
 const cron = require('node-cron');
 const fs = require('fs');
+const path = require('path');
+const Jimp = require('jimp');
 
 require('dotenv').config();
 
@@ -29,6 +31,48 @@ const generateCatTranslation = (englishText) => {
   return catTranslation.charAt(0).toUpperCase() + catTranslation.slice(1) + '.';
 };
 
+const generateQuoteImage = async (englishQuote, catTranslation) => {
+  const imagePath = path.resolve(__dirname, 'images', 'maxresdefault.jpg');
+  const image = await Jimp.read(imagePath);
+
+  const fontEnglish = await Jimp.loadFont(Jimp.FONT_SANS_64_BLACK);
+  const fontCat = await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK);
+
+  const imageWidth = image.bitmap.width;
+  const imageHeight = image.bitmap.height;
+
+  const padding = 40; // Padding from the edges
+  const textMaxWidth = (imageWidth / 2) - padding; // Restrict to left half
+
+  // Print English quote
+  const englishTextY = padding;
+  const englishMaxHeight = imageHeight - padding - englishTextY;
+
+  image.print(fontEnglish, padding, englishTextY, {
+    text: englishQuote,
+    alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT,
+    alignmentY: Jimp.VERTICAL_ALIGN_TOP
+  }, textMaxWidth, englishMaxHeight);
+
+  // Calculate the actual height of the rendered English text
+  const englishTextRenderedHeight = Jimp.measureTextHeight(fontEnglish, englishQuote, textMaxWidth);
+
+  // Calculate max height for Cat translation
+  const catTextY = englishTextY + englishTextRenderedHeight + 30; // 30 for spacing between lines
+  const catMaxHeight = imageHeight - padding - catTextY;
+
+  // Print Cat translation
+  image.print(fontCat, padding, catTextY, {
+    text: `Cat: ${catTranslation}`,
+    alignmentX: Jimp.HORIZONTAL_ALIGN_LEFT,
+    alignmentY: Jimp.VERTICAL_ALIGN_TOP
+  }, textMaxWidth, catMaxHeight);
+
+  const outputPath = path.resolve(__dirname, 'temp_quote_image.png');
+  await image.writeAsync(outputPath);
+  return outputPath;
+};
+
 const tweetQuote = async () => {
   const randomIndex = Math.floor(Math.random() * quotes.length);
   const { english, cat_translation } = quotes[randomIndex];
@@ -36,9 +80,15 @@ const tweetQuote = async () => {
   const tweetText = `"${english}"\n\nCat:\n${cat_translation}`;
 
   try {
+    const imagePath = await generateQuoteImage(english, cat_translation);
+    const mediaId = await twitterClient.v1.uploadMedia(imagePath);
+
     const truncatedTweet = tweetText.length > 280 ? tweetText.substring(0, 277) + '...' : tweetText;
-    await twitterClient.v2.tweet(truncatedTweet);
+    await twitterClient.v2.tweet(truncatedTweet, { media: { media_ids: [mediaId] } });
     console.log('Tweeted:', truncatedTweet);
+
+    // Clean up the temporary image file
+    fs.unlinkSync(imagePath);
   } catch (error) {
     console.error('Error tweeting:', error);
   }
