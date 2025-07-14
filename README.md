@@ -5,9 +5,8 @@ A bot that tweets famous, funny, and insightful quotes translated into cat langu
 ## Features
 
 *   Tweets every 4 hours.
-*   Fetches a random quote from the [Quotable API](https://github.com/lukePeavey/quotable).
-*   Translates the quote into a varied and creative "cat language".
-*   Includes the original English quote in the tweet for context.
+*   Selects a random quote from `quotes.json`.
+*   Includes the original English quote and its pre-translated cat version in the tweet.
 *   Truncates tweets to 280 characters to comply with Twitter's limit.
 
 ## Setup
@@ -34,7 +33,20 @@ A bot that tweets famous, funny, and insightful quotes translated into cat langu
         TWITTER_ACCESS_SECRET=your_access_secret
         ```
 
-4.  **Run the bot:**
+4.  **Add your own quotes:**
+    *   Edit the `quotes.json` file.
+    *   Each entry should be a JSON object with two keys: `english` for the original quote and `cat_translation` for its cat-translated version.
+    *   Example:
+        ```json
+        [
+          {
+            "english": "The only way to do great work is to love what you do.",
+            "cat_translation": "purr purr meow hiss mrow purr purr meow meow mew mew purr purr."
+          }
+        ]
+        ```
+
+5.  **Run the bot:**
     ```bash
     node index.js
     ```

@@ -1,6 +1,6 @@
 const { TwitterApi } = require('twitter-api-v2');
-const axios = require('axios');
 const cron = require('node-cron');
+const fs = require('fs');
 
 require('dotenv').config();
 
@@ -14,34 +14,24 @@ const client = new TwitterApi({
 
 const twitterClient = client.readWrite;
 
-const getQuote = async () => {
-  return "The secret of getting ahead is getting started.";
-};
-
-const translateToCat = (text) => {
-  const catSounds = ['meow', 'purr', 'hiss', 'mew', 'mrow', 'chirp'];
-  return text.split(' ').map(word => {
-    const sound = catSounds[Math.floor(Math.random() * catSounds.length)];
-    const repetition = Math.ceil(word.length / 3);
-    return Array(repetition).fill(sound).join(' ');
-  }).join(' ');
-};
+// Load quotes from quotes.json
+const quotes = JSON.parse(fs.readFileSync('./quotes.json', 'utf8'));
 
 const tweetQuote = async () => {
-  const quote = await getQuote();
-  if (quote) {
-    const catTranslation = translateToCat(quote);
-    const tweetText = `"${quote}"
+  const randomIndex = Math.floor(Math.random() * quotes.length);
+  const { english, cat_translation } = quotes[randomIndex];
+
+  const tweetText = `"${english}"
 
 Cat Translation:
-${catTranslation}`;
-    try {
-      const truncatedTweet = tweetText.length > 280 ? tweetText.substring(0, 277) + '...' : tweetText;
-      await twitterClient.v2.tweet(truncatedTweet);
-      console.log('Tweeted:', truncatedTweet);
-    } catch (error) {
-      console.error('Error tweeting:', error);
-    }
+${cat_translation}`;
+
+  try {
+    const truncatedTweet = tweetText.length > 280 ? tweetText.substring(0, 277) + '...' : tweetText;
+    await twitterClient.v2.tweet(truncatedTweet);
+    console.log('Tweeted:', truncatedTweet);
+  } catch (error) {
+    console.error('Error tweeting:', error);
   }
 };
 
