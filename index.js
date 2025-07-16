@@ -35,8 +35,8 @@ const generateQuoteImage = async (englishQuote, catTranslation) => {
   const imagePath = path.resolve(__dirname, 'images', 'maxresdefault.jpg');
   const image = await Jimp.read(imagePath);
 
-  const fontEnglish = await Jimp.loadFont(Jimp.FONT_SANS_64_BLACK);
-  const fontCat = await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK);
+  const fontEnglish = await Jimp.loadFont(Jimp.FONT_SANS_32_BLACK);
+  const fontCat = await Jimp.loadFont(Jimp.FONT_SANS_64_BLACK);
 
   const imageWidth = image.bitmap.width;
   const imageHeight = image.bitmap.height;
@@ -89,7 +89,7 @@ const tweetQuote = async () => {
   }
 };
 
-cron.schedule('0 */4 * * *', () => {
+cron.schedule('0 */3 * * *', () => {
   console.log('Running the twitter bot...');
   tweetQuote();
 });
